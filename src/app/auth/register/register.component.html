@@ -1,0 +1,21 @@
+<h2>Register</h2>
+
+<form (ngSubmit)="register()" #registerForm="ngForm">
+  <input type="text" name="name" [(ngModel)]="formData.name" placeholder="Name" required autocomplete="off" />
+  <input type="text" name="username" [(ngModel)]="formData.username" placeholder="Username" required autocomplete="off" />
+  <input type="email" name="email" [(ngModel)]="formData.email" placeholder="Email" required autocomplete="off" />
+  <input type="password" name="password" [(ngModel)]="formData.password" placeholder="Password" required autocomplete="off" />
+
+  <select name="role" [(ngModel)]="formData.role" required>
+    <option value="" disabled selected>Select Role</option>
+    <option value="STUDENT">Student</option>
+    <option value="INSTRUCTOR">Instructor</option>
+  </select>
+
+  <button type="submit">Register</button>
+</form>
+
+<button type="button" (click)="goToLogin()" style="margin-top: 10px;">
+    Back to Login
+  </button>
+  

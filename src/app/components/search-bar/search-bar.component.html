@@ -1,0 +1,80 @@
+
+<div style="margin-top: 50px;">
+
+
+<img src="UVAlogo.jpeg" alt="Logo" style="height: 50px; margin-bottom: 10px;" />
+
+
+  <h2 class="welcome-message" *ngIf="username">Welcome, {{ username }}!</h2>
+
+  
+<h2>Search Courses</h2>
+<input type="text" [(ngModel)]="searchQuery" placeholder="Search by course code or subject" autocomplete="off" />
+<button (click)="searchCourses()">Search</button>
+<button (click)="getAllCourses()">List All Courses</button>
+
+
+<div *ngIf="enrollmentSuccessMessage" style="margin-top: 20px; padding: 10px; background-color: #232D4B; border-radius: 5px; color: white;">
+  {{ enrollmentSuccessMessage }}
+</div>
+
+
+<div *ngIf="showSearchResults">
+    <h3>Results:</h3>
+    <button (click)="hideSearchResults()" style="margin-bottom: 10px;">Hide Results</button>
+    <ul>
+      <li *ngFor="let course of courses" 
+          (click)="selectCourse(course)" 
+          style="cursor: pointer; margin-bottom: 10px; padding: 10px; border: 1px solid #cac; border-radius: 5px;">
+  
+        <strong>{{ course.courseCode }}</strong> - {{ course.courseName }}
+  
+        <div *ngIf="selectedCourse === course" style="margin-top: 10px;">
+          <p><strong>Description:</strong> {{ course.courseDescription }}</p>
+          <button (click)="enrollInCourse(course.id); $event.stopPropagation()">Enroll</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+    
+<div *ngIf="showEnrolledCourses && enrolledCourses.length > 0" style="margin-top: 30px;">
+    <h3>My Enrolled Courses</h3>
+    <button (click)="hideEnrolledCourses()">Hide</button>
+    <ul>
+      <li *ngFor="let course of enrolledCourses"
+          style="margin-bottom: 10px; padding: 10px; border: 1px solid #8cc; border-radius: 5px;">
+        <strong>{{ course.courseCode }}</strong> - {{ course.courseName }}
+        <p><em>{{ course.courseSubject }}</em></p>
+        <p>{{ course.courseDescription }}</p>
+
+        <button (click)="unenrollFromCourse(course.id)">Unenroll</button>
+      </li>
+    </ul>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <!-- Left Side -->
+    <div style="flex: 1; margin-right: 30px;">
+      <!-- Search bar, course list, etc. -->
+    </div>
+  
+  <!-- Profile Card: Fixed to the top-right of the page -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px;">
+      <img 
+        src="studenticon.png" 
+        alt="Profile Picture" 
+        style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin: 0 auto 16px; display: block;" 
+      />
+      <h3>My Profile</h3>
+      <p><strong>Name:</strong> {{ user?.name }}</p>
+      <p><strong>Email:</strong> {{ user?.email }}</p>
+      <p><strong>Role:</strong> {{ user?.role }}</p>
+  
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <button type="button" (click)="getMyCourses()" style="width: 100px;">My Courses</button>
+        <button type="button" (click)="logout()" style="width: 100px;">Logout</button>
+      </div>
+    </div>
+  </div>
+  
