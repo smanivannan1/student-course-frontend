@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.css']
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnInit {
   searchQuery: string = '';
   courses: any[] = [];
   selectedCourse: any = null;
@@ -24,10 +24,58 @@ export class SearchBarComponent {
   enrollmentSuccessMessage: string = '';
   enrolledCourses: any[] = [];
   showEnrolledCourses = false;
+  activeTab: string = 'enrolled';
+  myGrades: any[] = [];
 
   constructor(private http: HttpClient, private router: Router) {
     this.loadUserName();
     this.getUserProfile();
+  }
+
+
+
+  ngOnInit(): void {
+    this.activeTab = 'enrolled';
+    this.getMyCourses();
+    this.loadMyGrades(); // Optional if you want to load grades too
+  }
+
+  loadMyGrades() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) return;
+  
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const userId = payload.userId;
+    const headers = { Authorization: `Bearer ${token}` };
+  
+    this.http.get<any[]>(`${environment.apiGatewayUrl}/gradebook/user/${userId}`, { headers })
+      .subscribe({
+        next: (grades) => {
+          this.myGrades = grades.filter((grade, index, self) =>
+            index === self.findIndex(g => g.courseId === grade.courseId)
+          );
+        },
+        error: (err) => {
+          console.error('Failed to load grades:', err);
+          this.myGrades = [];
+        }
+      });
+  }
+
+  getTabStyle(tab: string): any {
+    return {
+      padding: '10px 20px',
+      border: 'none',
+      borderBottom: this.activeTab === tab ? '4px solid #232D4B' : 'none',
+      backgroundColor: 'transparent',
+      color: this.activeTab === tab ? '#232D4B' : '#555',
+      fontWeight: this.activeTab === tab ? 'bold' : 'normal',
+      cursor: 'pointer'
+    };
+  }
+
+  goToCoursePage(courseId: number): void {
+    this.router.navigate(['/courses', courseId]);
   }
 
   searchCourses() {

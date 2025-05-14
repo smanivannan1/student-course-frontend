@@ -1,55 +1,53 @@
 <div style="margin-top: 50px;">
 
-    <img src="UVAlogo.jpeg" alt="Logo" style="height: 50px; margin-bottom: 10px;" />
-  
-    <h2 class="welcome-message" *ngIf="instructorName">Welcome, {{ instructorName }}!</h2>
+  <img src="UVAlogo.jpeg" alt="Logo" style="height: 50px; margin-bottom: 10px;" />
 
-    <!-- Display success message after successful enrollment -->
-<div *ngIf="enrollmentSuccessMessage" style="margin-top: 20px; padding: 10px; background-color: #F57C00; border: 1px solid #F57C00; border-radius: 5px; color: #FFFFFF;">
+  <h2 class="welcome-message" *ngIf="instructorName">Welcome, {{ instructorName }}!</h2>
+
+  <!-- Display success message after successful enrollment -->
+  <div *ngIf="enrollmentSuccessMessage" style="margin-top: 20px; padding: 10px; background-color: #F57C00; border: 1px solid #F57C00; border-radius: 5px; color: #FFFFFF;">
     <strong>Success!</strong> {{ enrollmentSuccessMessage }}
   </div>
 
+  <!-- Unified Search Bar Row -->
+  <div style="display: flex; gap: 40px; align-items: flex-end; margin-top: 30px;">
 
-<!-- Unified Search Bar Row -->
-<div style="display: flex; gap: 40px; align-items: flex-end; margin-top: 30px;">
-
-
-      <!-- Course Search Box -->
-  <div style="display: flex; flex-direction: column; width: 300px;">
-    <label><strong>Search Courses</strong></label>
-    <input type="text"
-           [(ngModel)]="searchQuery"
-           placeholder="Course code or subject"
-           style="margin-bottom: 4px; padding: 6px;" />
-           <div style="display: flex; gap: 10px;">
-            <button (click)="searchCourses()" style="width: 150px;">Search</button>
-            <button (click)="getAllCourses()" style="width: 150px;">List All</button>
-          </div>
-          
-  </div>
-  <!-- Student Search Box -->
-  <div style="display: flex; flex-direction: column; width: 300px;">
-    <label><strong>Search Students</strong></label>
-    <input type="text"
-           [(ngModel)]="studentQuery"
-           placeholder="Search by Name, Username, or Email"
-           style="margin-bottom: 4px; padding: 6px;" />
-    <button (click)="searchStudent()">Search</button>
-  </div>
-
-</div>
-
-<!-- Searched Student Info + Enrolled Courses -->
-<div *ngIf="searchedStudent" style="margin-top: 30px; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background-color: #f9f9f9; max-width: 600px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Student Info</h3>
-        <button (click)="hideStudentInfo()" style="padding: 4px 10px;">Hide</button>
+    <!-- Course Search Box -->
+    <div style="display: flex; flex-direction: column; width: 300px;">
+      <label><strong>Search Courses</strong></label>
+      <input type="text"
+             [(ngModel)]="searchQuery"
+             placeholder="Course code or subject"
+             style="margin-bottom: 4px; padding: 6px;" />
+      <div style="display: flex; gap: 10px;">
+        <button (click)="searchCourses()" style="width: 150px;">Search</button>
+        <button (click)="getAllCourses()" style="width: 150px;">List All</button>
       </div>
-    
+    </div>
+
+    <!-- Student Search Box -->
+    <div style="display: flex; flex-direction: column; width: 300px;">
+      <label><strong>Search Students</strong></label>
+      <input type="text"
+             [(ngModel)]="studentQuery"
+             placeholder="Search by Name, Username, or Email"
+             style="margin-bottom: 4px; padding: 6px;" />
+      <button (click)="searchStudent()">Search</button>
+    </div>
+
+  </div>
+
+  <!-- Searched Student Info + Enrolled Courses -->
+  <div *ngIf="searchedStudent" style="margin-top: 30px; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background-color: #f9f9f9; max-width: 600px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Student Info</h3>
+      <button (click)="hideStudentInfo()" style="padding: 4px 10px;">Hide</button>
+    </div>
+
     <p><strong>Name:</strong> {{ searchedStudent.name }}</p>
     <p><strong>Email:</strong> {{ searchedStudent.email }}</p>
     <p><strong>Role:</strong> {{ searchedStudent.role }}</p>
-  
+
     <!-- Enrolled Courses -->
     <div *ngIf="searchedStudentCourses.length > 0" style="margin-top: 15px;">
       <h4>Enrolled Courses</h4>
@@ -65,91 +63,67 @@
         </li>
       </ul>
     </div>
-  
+
     <div *ngIf="searchedStudentCourses.length === 0" style="margin-top: 10px;">
       <em>This student is not enrolled in any courses.</em>
     </div>
   </div>
 
-
   <!-- Course List -->
-<div *ngIf="showSearchResults && courses.length > 0">
+  <div *ngIf="showSearchResults && courses.length > 0">
     <h3>All Courses</h3>
-    <button (click)="hideAllResults()" style="margin-bottom: 10px;">
-      Hide Results
-    </button>
+    <button (click)="hideAllResults()" style="margin-bottom: 10px;">Hide Results</button>
     <ul>
       <li *ngFor="let course of courses"
           (click)="selectCourseForEnrollment(course)"
           style="cursor: pointer; margin-bottom: 10px; padding: 10px; border: 1px solid #cac; border-radius: 5px;">
-        
+
         <strong>{{ course.courseName }}</strong>: {{ course.description }}
-        
-        <!-- Edit/Delete buttons above Enroll button -->
+
+        <!-- ✅ Go to Course Page Button -->
+        <div style="margin-top: 8px;">
+          <button (click)="goToCoursePage(course.id); $event.stopPropagation()">Go to Course Page</button>
+        </div>
+
+        <!-- Only shown when selected -->
         <div *ngIf="selectedCourseForEnrollment === course" style="margin-top: 10px;">
           <p><strong>Subject:</strong> {{ course.courseSubject }}</p>
           <p><strong>Description:</strong> {{ course.courseDescription }}</p>
-          
+
           <div style="margin-bottom: 10px;">
             <button (click)="editCourse(course); $event.stopPropagation()">Edit</button>
             <button (click)="deleteCourse(course.id); $event.stopPropagation()">Delete</button>
           </div>
-  
-    
-  
-          <!-- Show student search bar if Enroll Student button is clicked -->
-          <div *ngIf="selectedCourseForEnrollment === course" style="margin-top: 10px;">
-            <h4>Search for a Student to Enroll in this Course</h4>
-            <input type="text" [(ngModel)]="studentToEnrollQuery" placeholder="Student name/email/username" />
-            <button (click)="searchStudentForEnrollment()">Search</button>
-  
-            <!-- Display searched student info if found -->
-            <div *ngIf="searchedStudentForEnrollment" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px;">
-              <p><strong>{{ searchedStudentForEnrollment.name }}</strong> ({{ searchedStudentForEnrollment.email }})</p>
-              <button (click)="enrollSearchedStudent()">Enroll</button>
-            </div>
+
+          <!-- Display searched student info if found -->
+          <div *ngIf="searchedStudentForEnrollment" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px;">
+            <p><strong>{{ searchedStudentForEnrollment.name }}</strong> ({{ searchedStudentForEnrollment.email }})</p>
+            <button (click)="enrollSearchedStudent()">Enroll</button>
           </div>
         </div>
+
       </li>
     </ul>
   </div>
 
+  <!-- Profile Card: Fixed to the top-right of the page -->
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px;">
+      <img 
+        src="instructoricon.png" 
+        alt="Profile Picture" 
+        style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin: 0 auto 16px; display: block;" 
+      />
+      <h3>My Profile</h3>
+      <p><strong>Name:</strong> {{ user?.name }}</p>
+      <p><strong>Email:</strong> {{ user?.email }}</p>
+      <p><strong>Role:</strong> {{ user?.role }}</p>
 
-
-
-  
-    <!-- Profile Card -->
-    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-      <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px;">
-        <img 
-          src="instructoricon.png" 
-          alt="Profile Picture" 
-          style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin: 0 auto 16px; display: block;" 
-        />
-        <h3>My Profile</h3>
-        <p><strong>Name:</strong> {{ user?.name }}</p>
-        <p><strong>Email:</strong> {{ user?.email }}</p>
-        <p><strong>Role:</strong> {{ user?.role }}</p>
-  
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-            <button (click)="logout()" style="width: 100%;">Logout</button>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <button type="button" (click)="getAllCourses()" style="width: 100px;">My Courses</button>
+        <button type="button" (click)="logout()" style="width: 100px;">Logout</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Create Course Card -->
-<div style="position: fixed; top: 330px; right: 20px; z-index: 1000;">
-  <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px; background-color: #fff;">
-    <h4 style="text-align: center; margin-bottom: 10px;">
-        {{ editingCourseId ? 'Edit Course' : 'Create Course' }}
-      </h4>
-      <form (ngSubmit)="submitCourse()" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" [(ngModel)]="newCourse.courseName" name="courseName" placeholder="Course Name" required />
-        <input type="text" [(ngModel)]="newCourse.courseDescription" name="courseDescription" placeholder="Description" required />
-        <input type="text" [(ngModel)]="newCourse.courseCode" name="courseCode" placeholder="Course Code" required />
-        <input type="text" [(ngModel)]="newCourse.courseSubject" name="courseSubject" placeholder="Subject" required />
-        <button type="submit">{{ editingCourseId ? 'Update' : 'Create' }}</button>
-        <button type="button" (click)="resetForm()" *ngIf="editingCourseId">Cancel</button>
-      </form>
- 
-  
+</div> <!-- closes the outermost container -->

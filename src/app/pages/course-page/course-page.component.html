@@ -1,0 +1,245 @@
+
+<div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+    <button (click)="goToHomepage()" style="padding: 8px 16px; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer;">
+      Return to Homepage
+    </button>
+  </div>
+
+  <div *ngIf="course" style="margin-bottom: 20px;">
+    <h2 style="color: #232D4B; margin-bottom: 4px;">
+      {{ course.courseCode }} - {{ course.courseName }}
+    </h2>
+    <p style="font-style: italic; color: #555;">{{ course.courseSubject }}</p>
+    <p style="color: #333;">{{ course.courseDescription }}</p>
+  </div>
+  
+ 
+  <!-- Tab Navigation -->
+  <div style="margin-top: 30px; display: flex; gap: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+    <button 
+      (click)="activeTab = 'assignments'; loadAssignments()" 
+      [ngStyle]="getTabStyle('assignments')"
+      style="background-color: #232D4B; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      Assignments
+    </button>
+    <button 
+      (click)="activeTab = 'gradebook'; loadGradebook()" 
+      [ngStyle]="getTabStyle('gradebook')"
+      style="background-color: #232D4B; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      Gradebook
+    </button>
+    <button 
+      (click)="activeTab = 'quizzes'" 
+      [ngStyle]="getTabStyle('quizzes')"
+      style="background-color: #232D4B; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      Quizzes
+    </button>
+    <button 
+      (click)="activeTab = 'students'; loadEnrolledStudents()" 
+      [ngStyle]="getTabStyle('students')"
+      style="background-color: #232D4B; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      Students
+    </button>
+  </div>
+   <!-- Tab Navigation END -->
+  
+  <!-- Tab Content -->
+  <div style="margin-top: 20px;">
+  
+    <!-- Assignments Tab -->
+    <div *ngIf="activeTab === 'assignments'">
+  
+   <!-- Assignment List -->
+<div *ngIf="assignments.length > 0" style="margin-bottom: 40px;">
+    <h4>Assignments</h4>
+    <ul>
+      <li *ngFor="let assignment of assignments"
+      style="
+        background-color: #F9DCBF;                         /* UVA Orange 25% background */
+        border-left: 6px solid #E57200;                    /* UVA Orange accent stripe */
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);             /* Subtle shadow */
+      ">
+        <strong>{{ assignment.title }}</strong><br />
+        <em>{{ assignment.instructions }}</em><br />
+        Due: {{ assignment.dueDate }} | Max Points: {{ assignment.maxPoints }}
+        <div *ngIf="userRole === 'STUDENT'" style="margin-top: 10px;">
+
+            <!-- Submission Form (guarded by *ngIf to ensure safe ngModel binding) -->
+            <div *ngIf="submissionInputs[assignment.id]">
+              <form 
+                (ngSubmit)="submitAssignment(assignment.id)" 
+                enctype="multipart/form-data"
+              >
+                <textarea
+                  [(ngModel)]="submissionInputs[assignment.id].content"
+                  name="content-{{ assignment.id }}"
+                  placeholder="Enter your response..."
+                  rows="3"
+                  style="width: 100%; margin-bottom: 8px;"
+                ></textarea>
+          
+                <input 
+                  type="file" 
+                  (change)="handleFileUpload($event, assignment.id)" 
+                /><br />
+          
+                <button type="submit">Submit</button>
+              </form>
+            </div>
+          
+            <!-- ✅ Display Submitted Content -->
+            <div *ngIf="studentSubmissions[assignment.id]" style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
+              <h5>Your Submission</h5>
+              <p *ngIf="studentSubmissions[assignment.id].content">
+                <strong>Text:</strong> {{ studentSubmissions[assignment.id].content }}
+              </p>
+              <p *ngIf="studentSubmissions[assignment.id].fileUrl">
+                <strong>File:</strong>
+                <a [href]="studentSubmissions[assignment.id].fileUrl" target="_blank">View File</a>
+              </p>
+              <p><strong>Status:</strong> {{ studentSubmissions[assignment.id].status }}</p>
+            </div>
+          </div>
+          
+  <!-- ✅ Instructor Grading Button + Section -->
+<div *ngIf="userRole === 'INSTRUCTOR'" style="margin-top: 20px;">
+    <button (click)="loadSubmissionsForAssignment(assignment.id)">View Submissions</button>
+  
+    <div *ngIf="hasSubmissions(assignment.id)" style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">
+      <h5>Grade Submissions</h5>
+      <div *ngFor="let sub of allSubmissions[assignment.id]" style="margin-bottom: 15px;">
+        <p><strong>Student:</strong> {{ userMap[sub.userId] || 'Loading...' }}</p>
+        <p><strong>Submitted:</strong> {{ sub.submittedAt | date:'short' }}</p>
+        <p><strong>Content:</strong> {{ sub.content }}</p>
+        <p *ngIf="sub.fileUrl">
+          <strong>File:</strong> <a [href]="sub.fileUrl" target="_blank">View File</a>
+        </p>
+        <div *ngIf="gradingInputs[sub.id] as input">
+            <form 
+              (ngSubmit)="gradeSubmission(sub.id, input.score, input.feedback)" 
+              style="display: flex; flex-direction: column; gap: 8px;"
+            >
+              <input 
+                type="number" 
+                [(ngModel)]="input.score" 
+                [name]="'score-' + sub.id" 
+                placeholder="Score" 
+                required 
+              />
+              <textarea 
+                [(ngModel)]="input.feedback" 
+                [name]="'feedback-' + sub.id" 
+                placeholder="Feedback" 
+                rows="2"
+              ></textarea>
+              <button type="submit">Submit Grade</button>
+            </form>
+          </div>
+          
+      </div>
+    </div>
+  </div>
+  
+      </li>
+    </ul>
+  </div>
+  
+      <div *ngIf="assignments.length === 0" style="margin-top: 20px;">
+        <em>No assignments yet for this course.</em>
+      </div>
+  
+  
+      <!-- Only show this floating card if the user is an INSTRUCTOR -->
+<div *ngIf="userRole === 'INSTRUCTOR'" style="position: fixed; top: 200px; right: 20px; z-index: 1000;">
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px; background-color: #fff;">
+      <h4 style="text-align: center; margin-bottom: 10px;">Create Assignment</h4>
+      <form (ngSubmit)="createAssignment()" style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" [(ngModel)]="newAssignment.title" name="title" placeholder="Title" required />
+        <textarea [(ngModel)]="newAssignment.instructions" name="instructions" placeholder="Instructions" rows="3"></textarea>
+        <label><strong>Due Date</strong></label>
+        <input type="date" [(ngModel)]="newAssignment.dueDate" name="dueDate" required />
+        <input type="number" [(ngModel)]="newAssignment.maxPoints" name="maxPoints" placeholder="Max Points" />
+        <button type="submit">Create</button>
+      </form>
+    </div>
+  </div>
+  
+  
+    </div> <!-- END assignments tab -->
+  
+    <!-- Gradebook Tab -->
+    <div *ngIf="activeTab === 'gradebook'">
+        <div *ngIf="gradebook">
+          <h4>Gradebook</h4>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="text-align: left; padding: 8px;">Assignment</th>
+                <th style="text-align: right; padding: 8px;">Max Points</th>
+                <th style="text-align: right; padding: 8px;">Earned</th>
+                <th style="text-align: left; padding: 8px;">Status</th>
+                <th style="text-align: left; padding: 8px;">Submitted</th>
+                <th style="text-align: left; padding: 8px;">Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let entry of gradebook.assignments">
+                <td style="padding: 8px;">{{ entry.assignmentName }}</td>
+                <td style="text-align: right; padding: 8px;">{{ entry.maxPoints }}</td>
+                <td style="text-align: right; padding: 8px;">{{ entry.earnedPoints }}</td>
+                <td style="padding: 8px;">{{ entry.status }}</td>
+                <td style="padding: 8px;">{{ entry.submittedAt | date:'short' }}</td>
+                <td style="padding: 8px;">{{ entry.dueDate | date:'shortDate' }}</td>
+              </tr>
+            </tbody>
+          </table>
+      
+          <div style="margin-top: 20px;">
+            <strong>Total Grade:</strong> {{ gradebook.percentage | number: '1.0-2' }}%<br />
+            <strong>Letter Grade:</strong> {{ gradebook.letterGrade }}
+          </div>
+        </div>
+      
+        <div *ngIf="!gradebook">
+          <em>Loading gradebook data...</em>
+        </div>
+      </div>
+  <!-- Gradebook Tab END -->
+
+
+      <!-- Quizzes Tab -->
+    <div *ngIf="activeTab === 'quizzes'">
+      <p><em>Quizzes feature coming soon.</em></p>
+    </div>
+  
+    <div *ngIf="activeTab === 'students'">
+        <div *ngIf="students.length > 0">
+          <h4>Enrolled Students</h4>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Name</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Email</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students">
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ student.name }}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ student.email }}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ student.role }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+        <div *ngIf="students.length === 0">
+          <em>No students found.</em>
+        </div>
+      </div>
+  
+  </div> <!-- END tab content container -->
+  

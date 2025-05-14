@@ -1,10 +1,21 @@
-<div class="login-container">
-  <h2>Login</h2>
+<div class="login-container" style="
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 32px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-top: 6px solid #E57200;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+">
+  <img src="uva-banner.png" alt="UVA Logo" style="width: 180px; margin-bottom: 20px;" />
 
+  <h2 style="color: #232D4B; margin-bottom: 20px;">Login</h2>
 
-  <form (ngSubmit)="onLogin()" #loginForm="ngForm">
-    <div>
-      <label>Email</label><br />
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm" style="text-align: left;">
+    <div style="margin-bottom: 16px;">
+      <label style="color: #232D4B;">Email</label><br />
       <input
         type="email"
         name="email"
@@ -12,11 +23,12 @@
         required
         placeholder="Enter your email"
         autocomplete="off"
+        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"
       />
     </div>
 
-    <div>
-      <label>Password</label><br />
+    <div style="margin-bottom: 20px;">
+      <label style="color: #232D4B;">Password</label><br />
       <input
         type="password"
         name="password"
@@ -24,18 +36,25 @@
         required
         placeholder="Enter your password"
         autocomplete="off"
+        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"
       />
     </div>
 
-    <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    <button 
+      type="submit" 
+      [disabled]="loginForm.invalid"
+      style="width: 100%; padding: 10px; background-color: #232D4B; color: white; border: none; border-radius: 6px; cursor: pointer;"
+    >
+      Login
+    </button>
   </form>
 
   <div *ngIf="error" style="color: red; margin-top: 10px;">
     {{ error }}
   </div>
 
-  <p style="margin-top: 10px;">
-    Don’t have an account?
-    <a routerLink="/register">Register here</a>
+  <p style="margin-top: 16px; font-size: 0.9em;">
+    Don’t have an account? 
+    <a routerLink="/register" style="color: #E57200; text-decoration: none;">Register here</a>
   </p>
 </div>

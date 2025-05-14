@@ -3,7 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment'; // ✅ Added
+import { environment } from '../../../environments/environment'; 
+import { RouterModule } from '@angular/router';  
 
 @Component({
   selector: 'app-instructor-dashboard',
@@ -45,10 +46,12 @@ export class InstructorDashboardComponent {
   }
 
   selectCourseForEnrollment(course: any): void {
-    this.selectedCourseForEnrollment = course;
+    this.selectedCourseForEnrollment =
+      this.selectedCourseForEnrollment === course ? null : course;
     this.searchedStudentForEnrollment = null;
     this.studentToEnrollQuery = '';
   }
+
 
   searchStudentForEnrollment(): void {
     const token = localStorage.getItem('jwtToken');
@@ -289,6 +292,10 @@ export class InstructorDashboardComponent {
         this.searchedStudentCourses = [];
       }
     });
+  }
+
+  goToCoursePage(courseId: string): void {
+    this.router.navigate(['/courses', courseId]);
   }
 
   unenrollStudent(courseId: number): void {

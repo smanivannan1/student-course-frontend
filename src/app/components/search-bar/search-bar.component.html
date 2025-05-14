@@ -1,80 +1,180 @@
-
-<div style="margin-top: 50px;">
-
-
-<img src="UVAlogo.jpeg" alt="Logo" style="height: 50px; margin-bottom: 10px;" />
-
-
+<!-- Main Content -->
+<div style="margin-top: 50px; padding-right: 300px;"> 
+  <img 
+    src="uva-banner.png" 
+    alt="UVA Logo" 
+    style="width: 350px; height: auto; margin-bottom: 10px;" />
+</div>
+<!-- Main Content -->
+<div style="margin-top: 30px; padding-right: 300px;">
   <h2 class="welcome-message" *ngIf="username">Welcome, {{ username }}!</h2>
+</div>
+  <!-- Tab Navigation -->
+  <div style="margin-top: 30px; display: flex; gap: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+    <button 
+      (click)="activeTab = 'enrolled'; getMyCourses()" 
+      [ngStyle]="getTabStyle('enrolled')">
+      My Courses
+    </button>
+    <button 
+      (click)="activeTab = 'search'" 
+      [ngStyle]="getTabStyle('search')">
+      Search Courses
+    </button>
+    <button 
+  (click)="activeTab = 'grades'; loadMyGrades()" 
+  [ngStyle]="getTabStyle('grades')">
+  My Grades
+</button>
+  </div>
 
-  
-<h2>Search Courses</h2>
-<input type="text" [(ngModel)]="searchQuery" placeholder="Search by course code or subject" autocomplete="off" />
-<button (click)="searchCourses()">Search</button>
-<button (click)="getAllCourses()">List All Courses</button>
+  <!-- Tab Content -->
+  <div style="margin-top: 20px;">
 
+    <!-- Search Courses Tab -->
+    <div *ngIf="activeTab === 'search'">
+      <h2>Search Courses</h2>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by course code or subject" style="flex: 1; padding: 8px;" />
+        <button (click)="searchCourses()">Search</button>
+        <button (click)="getAllCourses()">List All</button>
+      </div>
 
-<div *ngIf="enrollmentSuccessMessage" style="margin-top: 20px; padding: 10px; background-color: #232D4B; border-radius: 5px; color: white;">
-  {{ enrollmentSuccessMessage }}
+      <div *ngIf="enrollmentSuccessMessage" style="margin-top: 20px; padding: 10px; background-color: #232D4B; color: white; border-radius: 5px;">
+        {{ enrollmentSuccessMessage }}
+      </div>
+
+      <div *ngIf="showSearchResults">
+        <h3 style="margin-top: 30px;">Results:</h3>
+        <button (click)="hideSearchResults()" style="margin-bottom: 10px;">Hide Results</button>
+        <ul>
+          <li *ngFor="let course of courses" 
+    (click)="selectCourse(course)" 
+    style="
+      background-color: #F9DCBF; border-left: 6px solid #E57200; padding: 16px; margin-bottom: 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+    ">
+            <strong>{{ course.courseCode }}</strong> - {{ course.courseName }}
+            <div *ngIf="selectedCourse === course" style="margin-top: 10px;">
+              <p><strong>Description:</strong> {{ course.courseDescription }}</p>
+              <button (click)="enrollInCourse(course.id); $event.stopPropagation()" style="background-color: #E57200; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;"> 
+                Enroll</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+     <!-- Search Courses Tab END -->
+
+    <!--  My Courses Tab -->
+    <div *ngIf="activeTab === 'enrolled'">
+      <h3>My Enrolled Courses</h3>
+      <div *ngIf="enrolledCourses.length > 0">
+        <ul>
+          <li *ngFor="let course of enrolledCourses"
+          style="
+            background-color: #F9DCBF;                         /* UVA Orange 25% background */
+            border-left: 6px solid #E57200;                    /* UVA Orange accent stripe */
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);             /* Subtle shadow */
+          ">
+        <div style="color: #232D4B; font-weight: bold; font-size: 1.2em;">
+          {{ course.courseCode }} - {{ course.courseName }}
+        </div>
+      
+        <p style="color: #232D4B; margin: 4px 0;"><em>{{ course.courseSubject }}</em></p>
+        <p style="margin: 4px 0; color: #333;">{{ course.courseDescription }}</p>
+      
+        <div style="margin-top: 10px;">
+          <button (click)="goToCoursePage(course.id)"
+                  style="background-color: #232D4B; color: white; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">
+            Go to Course Page
+          </button>
+      
+          <button (click)="unenrollFromCourse(course.id)"
+                  style="background-color: #E57200; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+            Unenroll
+          </button>
+        </div>
+      </li>
+        </ul>
+      </div>
+      <div *ngIf="enrolledCourses.length === 0">
+        <em>You are not enrolled in any courses.</em>
+      </div>
+    </div>
+   <!--  My Courses Tab END -->
+
+    <!-- My Grades Tab -->
+<div *ngIf="activeTab === 'grades'">
+  <h3>My Grades</h3>
+
+  <div *ngIf="myGrades.length > 0; else noGrades">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background-color: #f2f2f2;">
+          <th style="text-align: left; padding: 8px;">Course</th> <!-- or Course Name if available -->
+          <th style="text-align: right; padding: 8px;">Score</th>
+          <th style="text-align: center; padding: 8px;">Grade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let grade of myGrades">
+          <td style="padding: 8px;">
+            <div><strong>{{ grade.gradebookCourseCode }}</strong></div>
+            <div style="font-size: 0.85em; color: #666;">{{ grade.gradebookCourseName }}</div>
+          </td>
+          <td style="text-align: right; padding: 8px;">
+            {{ grade.letterGrade === 'N/A' ? 'N/A' : (grade.percentage | number:'1.0-2') + '%' }}
+          </td>
+          <td style="text-align: center; padding: 8px;">{{ grade.letterGrade }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noGrades>
+    <p><em>No grades available yet.</em></p>
+  </ng-template>
 </div>
 
 
-<div *ngIf="showSearchResults">
-    <h3>Results:</h3>
-    <button (click)="hideSearchResults()" style="margin-bottom: 10px;">Hide Results</button>
-    <ul>
-      <li *ngFor="let course of courses" 
-          (click)="selectCourse(course)" 
-          style="cursor: pointer; margin-bottom: 10px; padding: 10px; border: 1px solid #cac; border-radius: 5px;">
-  
-        <strong>{{ course.courseCode }}</strong> - {{ course.courseName }}
-  
-        <div *ngIf="selectedCourse === course" style="margin-top: 10px;">
-          <p><strong>Description:</strong> {{ course.courseDescription }}</p>
-          <button (click)="enrollInCourse(course.id); $event.stopPropagation()">Enroll</button>
-        </div>
-      </li>
-    </ul>
-  </div>
-    
-<div *ngIf="showEnrolledCourses && enrolledCourses.length > 0" style="margin-top: 30px;">
-    <h3>My Enrolled Courses</h3>
-    <button (click)="hideEnrolledCourses()">Hide</button>
-    <ul>
-      <li *ngFor="let course of enrolledCourses"
-          style="margin-bottom: 10px; padding: 10px; border: 1px solid #8cc; border-radius: 5px;">
-        <strong>{{ course.courseCode }}</strong> - {{ course.courseName }}
-        <p><em>{{ course.courseSubject }}</em></p>
-        <p>{{ course.courseDescription }}</p>
-
-        <button (click)="unenrollFromCourse(course.id)">Unenroll</button>
-      </li>
-    </ul>
   </div>
 
-  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <!-- Left Side -->
-    <div style="flex: 1; margin-right: 30px;">
-      <!-- Search bar, course list, etc. -->
-    </div>
-  
-  <!-- Profile Card: Fixed to the top-right of the page -->
+
+<!-- Profile Card: Outside main content, fixed to top-right -->
 <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 250px;">
-      <img 
-        src="studenticon.png" 
-        alt="Profile Picture" 
-        style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin: 0 auto 16px; display: block;" 
-      />
-      <h3>My Profile</h3>
-      <p><strong>Name:</strong> {{ user?.name }}</p>
-      <p><strong>Email:</strong> {{ user?.email }}</p>
-      <p><strong>Role:</strong> {{ user?.role }}</p>
-  
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-        <button type="button" (click)="getMyCourses()" style="width: 100px;">My Courses</button>
-        <button type="button" (click)="logout()" style="width: 100px;">Logout</button>
-      </div>
+  <div style="
+    width: 200px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  ">
+    <img src="studenticon.png" alt="Profile"
+         style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; margin: 0 auto 10px; display: block;" />
+    
+    <h4 style="text-align: center; margin: 4px 0;">My Profile</h4>
+    <p style="margin: 2px 0;"><strong>Name:</strong> {{ user?.name }}</p>
+    <p style="margin: 2px 0;"><strong>Email:</strong> {{ user?.email }}</p>
+    <p style="margin: 2px 0;"><strong>Role:</strong> {{ user?.role }}</p>
+
+    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+      <button 
+        (click)="activeTab = 'enrolled'; getMyCourses()" 
+        style="width: 100%; padding: 4px 8px; font-size: 0.85em; background-color: #232D4B; color: white; border: none; border-radius: 4px;">
+        My Courses
+      </button>
+      <button 
+        (click)="logout()" 
+        style="width: 100%; padding: 4px 8px; font-size: 0.85em; background-color: #232D4B; color: white; border: none; border-radius: 4px;">
+        Logout
+      </button>
     </div>
   </div>
-  
+</div>
+
